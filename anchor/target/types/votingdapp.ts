@@ -83,6 +83,12 @@ export type Votingdapp = {
       ]
     }
   ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "descriptionTooLong"
+    }
+  ],
   "types": [
     {
       "name": "poll",
