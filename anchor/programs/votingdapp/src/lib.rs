@@ -15,6 +15,10 @@ pub mod votingdapp {
         poll_start: u64,
         poll_end: u64,
     ) -> Result<()> {
+        if description.len() > 100 {
+            return Err(VotingError::DescriptionTooLong.into());
+        }
+
         let poll = &mut ctx.accounts.poll;
         poll.poll_id = poll_id;
         poll.description = description;
@@ -23,6 +27,11 @@ pub mod votingdapp {
         poll.candidate_amount = 0;
         Ok(())
     }
+}
+
+#[error_code]
+pub enum VotingError {
+    DescriptionTooLong,
 }
 
 #[derive(Accounts)]
@@ -36,7 +45,7 @@ pub struct InitializePoll<'info> {
     space = 8 + Poll::INIT_SPACE,
     seeds = [poll_id.to_le_bytes().as_ref()],
     bump
-  )]
+    )]
     pub poll: Account<'info, Poll>,
 
     pub system_program: Program<'info, System>,
@@ -46,7 +55,7 @@ pub struct InitializePoll<'info> {
 #[derive(InitSpace)]
 pub struct Poll {
     pub poll_id: u64,
-    #[max_len(32)]
+    #[max_len(100)]
     pub description: String,
     pub poll_start: u64,
     pub poll_end: u64,
