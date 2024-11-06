@@ -34,5 +34,10 @@ describe('votingdapp', () => {
     const poll = await votingProgram.account.poll.fetch(pollAddress);
 
     console.log(poll);
+
+    expect(poll.pollId.toNumber()).toBe(1);
+    expect(poll.description).toBe("whait is your favorite programming language?");
+    expect(poll.pollStart.toNumber()).toBe(0);
+    expect(poll.pollEnd.toNumber()).toBe(1830877602);
   });
 })
