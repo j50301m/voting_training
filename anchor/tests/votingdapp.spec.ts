@@ -4,20 +4,30 @@ import { Keypair, PublicKey } from '@solana/web3.js'
 import { BankrunProvider, startAnchor } from "anchor-bankrun";
 import { Votingdapp } from '../target/types/votingdapp'
 import { publicKey } from '@coral-xyz/anchor/dist/cjs/utils';
+import { atomWithDefault } from 'jotai/utils';
+import exp from 'constants';
 
 const IDL = require("../target/idl/votingdapp.json");
 const votingAddress = new PublicKey("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 
 describe('votingdapp', () => {
-  it('Initialize Poll', async () => {
-    const context = await startAnchor("", [{ name: "votingdapp", programId: votingAddress }], []);
-    const provider = new BankrunProvider(context);
 
-    const votingProgram = new Program<Votingdapp>(
+  let context;
+  let provider;
+  let votingProgram: anchor.Program<Votingdapp>;
+
+  beforeAll(async () => {
+    context = await startAnchor("", [{ name: "votingdapp", programId: votingAddress }], []);
+    provider = new BankrunProvider(context);
+
+    votingProgram = new Program<Votingdapp>(
       IDL,
       provider,
     )
+  })
 
+
+  it('Initialize Poll', async () => {
     await votingProgram.methods.initializePoll(
       new anchor.BN(1),
       "whait is your favorite programming language?",
@@ -40,4 +50,39 @@ describe('votingdapp', () => {
     expect(poll.pollStart.toNumber()).toBe(0);
     expect(poll.pollEnd.toNumber()).toBe(1830877602);
   });
+
+  it("initialize candidate", async () => {
+    await votingProgram.methods.initializeCandidate(
+      "Rust",
+      new anchor.BN(1),
+    ).rpc();
+
+    await votingProgram.methods.initializeCandidate(
+      "Javascript",
+      new anchor.BN(1),
+    ).rpc();
+
+    // Fetch candidate
+    const [candidateAddress1] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer,'le',8),Buffer.from("Rust")],
+      votingAddress,
+    );
+
+    const [candidateAddress2] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer,'le',8),Buffer.from("Javascript")],
+      votingAddress,
+    );
+    const candidate1 = await votingProgram.account.candidate.fetch(candidateAddress1);
+    const candidate2 = await votingProgram.account.candidate.fetch(candidateAddress2);
+    
+    // Validate candidate properties
+    console.log(candidate1);
+    console.log(candidate2);
+
+    expect(candidate1.candidateName).toEqual("Rust");
+    expect(candidate1.candidateVotes.toNumber()).toEqual(0);
+    expect(candidate2.candidateName).toEqual("Javascript");
+    expect(candidate2.candidateVotes.toNumber()).toEqual(0);
+  });
+
 })
