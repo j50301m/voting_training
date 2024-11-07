@@ -64,17 +64,17 @@ describe('votingdapp', () => {
 
     // Fetch candidate
     const [candidateAddress1] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer,'le',8),Buffer.from("Rust")],
+      [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from("Rust")],
       votingAddress,
     );
 
     const [candidateAddress2] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer,'le',8),Buffer.from("Javascript")],
+      [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from("Javascript")],
       votingAddress,
     );
     const candidate1 = await votingProgram.account.candidate.fetch(candidateAddress1);
     const candidate2 = await votingProgram.account.candidate.fetch(candidateAddress2);
-    
+
     // Validate candidate properties
     console.log(candidate1);
     console.log(candidate2);
@@ -85,4 +85,21 @@ describe('votingdapp', () => {
     expect(candidate2.candidateVotes.toNumber()).toEqual(0);
   });
 
+  it("vote", async () => {
+    await votingProgram.methods.vote(
+      "Rust",
+      new anchor.BN(1),
+    ).rpc();
+
+    // Fetch candidate
+    const [candidateAddress1] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from("Rust")],
+      votingAddress,
+    );
+    const candidate1 = await votingProgram.account.candidate.fetch(candidateAddress1);
+    console.log(candidate1);
+
+    expect(candidate1.candidateVotes.toNumber()).toEqual(1);
+
+  });
 })
