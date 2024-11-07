@@ -8,22 +8,23 @@ import { atomWithDefault } from 'jotai/utils';
 import exp from 'constants';
 
 const IDL = require("../target/idl/votingdapp.json");
-const votingAddress = new PublicKey("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
+const votingAddress = new PublicKey("JDvZvLkfgW63vp7RkpHHxpLWgSFmc8bkrgofRxLBZQzp");
 
 describe('votingdapp', () => {
 
   let context;
   let provider;
-  let votingProgram: anchor.Program<Votingdapp>;
+  anchor.setProvider(anchor.AnchorProvider.env());
+  let votingProgram = anchor.workspace.Votingdapp as Program<Votingdapp>;
 
   beforeAll(async () => {
-    context = await startAnchor("", [{ name: "votingdapp", programId: votingAddress }], []);
-    provider = new BankrunProvider(context);
+    // context = await startAnchor("", [{ name: "votingdapp", programId: votingAddress }], []);
+    // provider = new BankrunProvider(context);
 
-    votingProgram = new Program<Votingdapp>(
-      IDL,
-      provider,
-    )
+    // votingProgram = new Program<Votingdapp>(
+    //   IDL,
+    //   provider,
+    // )
   })
 
 
